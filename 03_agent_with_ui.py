@@ -2,6 +2,10 @@ import chainlit as cl
 import semantic_kernel as sk
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.functions import kernel_function
+from dotenv import load_dotenv
+import os
+# Load environment variables from .env file
+load_dotenv()
 
 from semantic_kernel.agents import ChatCompletionAgent, ChatHistoryAgentThread
 # Example Native Plugin (Tool)
@@ -23,7 +27,11 @@ async def on_chat_start():
 
     # Add your AI service (e.g., OpenAI)
     # Make sure OPENAI_API_KEY and OPENAI_ORG_ID are set in your environment
-    ai_service = AzureChatCompletion()
+    ai_service = AzureChatCompletion(            
+        deployment_name=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME'),  # Specify the deployment name
+        endpoint=os.getenv('AZURE_OPENAI_ENDPOINT'),  # Specify the endpoint
+        api_key=os.getenv('AZURE_OPENAI_API_KEY'),  # Specify the API key)
+    )
     kernel.add_service(ai_service)
 
     # Import the WeatherPlugin
@@ -60,3 +68,6 @@ async def on_message(message: cl.Message):
 
     # Send the final message
     await answer.send()
+
+
+    #https://developer.microsoft.com/en-us/reactor/events/25313/

@@ -5,6 +5,11 @@ from semantic_kernel.agents import ChatCompletionAgent
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatPromptExecutionSettings
 from semantic_kernel.functions import kernel_function, KernelArguments
 
+from dotenv import load_dotenv
+import os
+# Load environment variables from .env file
+load_dotenv()
+
 class MenuPlugin:
     @kernel_function(description="Provides a list of specials from the menu.")
     def get_specials(self) -> Annotated[str, "Returns the specials from the menu."]:
@@ -31,14 +36,18 @@ async def main():
 
     # Create agent with plugin and settings
     agent = ChatCompletionAgent(
-        service=AzureChatCompletion(),
+        service=AzureChatCompletion(
+            deployment_name=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME'),  # Specify the deployment name
+            endpoint=os.getenv('AZURE_OPENAI_ENDPOINT'),  # Specify the endpoint
+            api_key=os.getenv('AZURE_OPENAI_API_KEY'),  # Specify the API key
+        ),
         name="SK-Assistant",
         instructions="You are a helpful assistant.",
         plugins=[MenuPlugin()],
         arguments=KernelArguments(settings)
     )
 
-    response = await agent.get_response(messages="What is the price of the soup special?")
+    response = await agent.get_response(messages="What is the soup special and its price?")
     print(response.content)
 
     # Output:
